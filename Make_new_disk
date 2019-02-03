@@ -1,0 +1,76 @@
+====================================================================================
+====================================================================================
+Prepare the disk to be cloned
+====================================================================================
+====================================================================================
+
+# First ensure which disk to clone
+sudo fdisk -l
+
+Shrink the / partition to a almost minimum so that we hve the smallest possible amount to copy
+
+Assume below that it is /dev/sdb
+
+sudo sgdisk --backup=backup_DD2419_3part_20GB.sgdisk /dev/sdb
+# Generates lots of warnings
+
+sudo umount /dev/sdb1
+sudo umount /dev/sdb2
+
+
+# Store the UUIDs
+sudo blkid /dev/sdb > uuid-sdb.txt
+sudo blkid /dev/sdb1 > uuid-sdb1.txt
+sudo blkid /dev/sdb2 > uuid-sdb2.txt
+sudo blkid /dev/sdb3 > uuid-sdb3.txt
+
+# Copy the partition data (that we need to keep)
+sudo dd if=/dev/sdb1 of=sdb1_PC.img bs=4096   # roughly 3s
+sudo dd if=/dev/sdb2 of=sdb2_PC.img bs=4096      # roughly 120s
+
+# We also need to do this for a disk with Mac formatting, ie a hfs+ partition instead of fat32 for sdb1
+# We need both sdb1 and the partition table
+
+
+
+====================================================================
+====================================================================
+Make a new disk
+====================================================================
+====================================================================
+
+Go to the directory where the cloned partitions are (also where this file most likely is)
+
+# First ensure which disk to clone into
+sudo fdisk -l
+
+Assume below that it is /dev/sdb
+
+
+# Make sure the partitions are unmounted
+sudo umount /dev/sdb1
+sudo umount /dev/sdb2
+
+# Restore the GPT partition table
+sudo sgdisk -g --load-backup=backup_DD2419_3part_20GB.sgdisk /dev/sdb  
+# You might need to use option -g if it is not already a GPT
+# You may need to plug out and in again for it to understand that it has been change
+
+sudo umount /dev/sdb1
+sudo umount /dev/sdb2
+
+# Restore the data to the disks
+sudo mkswap -U `cat uuid-sdb3.txt | sed -n '/sdb3/s/.*UUID=\"\([^\"]*\)\".*/\1/p'` /dev/sdb3
+sudo dd if=sdb1_PC.img of=/dev/sdb1 bs=4096		# Should take about 5s
+sudo dd if=sdb2_PC.img of=/dev/sdb2 bs=4096		# Should take about 180s
+
+# Grow the / partition to fill the whole space
+# Warning this assumes a very specific geometry of the disk!!!!!
+#sudo parted /dev/sdb resizepart 2 484792319s
+#sleep 2
+#sudo e2fsck -f /dev/sdb2 
+#sleep 2
+#sudo resize2fs /dev/sdb2 
+
+
+
