@@ -192,12 +192,13 @@ sleep 1
 
 # Grow the / partition to fill the whole space
 # Warning this assumes a very specific geometry of the disk!!!!!
-echo -e "${YELLOW}Grow / to 212GB${NC}"
+echo -e "${YELLOW}Grow / to ca 200GB${NC}"
 if [[ "$computer_type" == "PC" ]]; then
-	parted ${disk} resizepart 2 484792319s
+	echo "Growing 2nd partition"
+	parted ${disk} resizepart 2 487217151s
 else
-	echo "NOT tested growing Mac partition"
-	#	parted ${disk} resizepart 2 484792319s
+	echo "Growing 2nd partition"
+	parted ${disk} resizepart 2 420481023s
 fi
 echo "Wating 1s..."
 sleep 1
