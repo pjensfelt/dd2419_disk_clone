@@ -116,8 +116,8 @@ echo -e "${GREEN}Disk info for $disk${NC}"
 echo -e "${YELLOW}$diskinfo ${NC}"
 echo ""
 
-#only_allowed_brand="Samsung Portable SSD T5 (scsi)"
-only_allowed_brand="Seagate BUP Slim WH (scsi)"
+only_allowed_brand="Samsung Portable SSD T5 (scsi)"
+#only_allowed_brand="Seagate BUP Slim WH (scsi)"
 if [[ -z `echo ${diskinfo} | grep "${only_allowed_brand}"` ]]; then
 	echo -e "${RED}ERROR! Refusing to install on this disk.${NC}"
 	echo -e "${PURPLE}Only installing on disks of type $only_allowed_brand${NC}"
